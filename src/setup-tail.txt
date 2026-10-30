@@ -1,0 +1,23 @@
+/boot/bin/devc-ser8250 -u2 -E -S -F -b115200 2f8,3
+/bin/waitfor /dev/ser2 5
+/bin/devb-ram disk name=nbtvm ram capacity=65536 blk cache=512k,vnode=256 >/dev/null 2>&1
+/bin/waitfor /dev/nbtvm0t77 120
+/boot/bin/mount -tqnx4 /dev/nbtvm0t77 /fs/sda1
+/bin/mkdir -p /var/opt/hmi/data/rw /var/opt/sys
+/boot/bin/slogger
+/bin/pipe
+/bin/io-pkt-v4 -ptcpip
+export DSI_IP_ADDRESS=127.0.0.1 DSI_IP_TRUSTED_ADDRESSES=127.0.0.1
+/opt/sys/bin/servicebroker -f /opt/sys/etc/servicebroker.cfg -t -i 1000 >/var/servicebroker.log 2>&1 &
+/bin/waitfor /srv/servicebroker 5
+/opt/sys/bin/most --dsiwaitforboot=1 --trccachesize=500 --bp=/opt/sys/etc --bp=/var/opt/sys --poweron=true --devmode=client --serverRoleName=MOSTSubSystemServer --mapMOSTSubSystem.DSYSMOSTServer=MOSTSubSystemIntel.DSYSMOSTServer --SIPCProtocol=raw --heartbeat-interval=2 >/var/most.log 2>&1 &
+MOST_PID=$!; print -r -- "Native MOST client launched: PID=$MOST_PID"
+/bin/sleep 2
+export MALLOC_ARENA_SIZE=65536 NV_PUSHBUFFER_SIZE=0x80000 NV_PB_STATS=1 DSI_DEBUG=1 DSI_LOGFILE=/var/hmi-dsi.log
+export NBT_VM_INPUT_HMI_SHA256=554b67d4d6317cfb1715d544874fae8ddd2c975be503c9e2514e2dc2f3a0d693 NBT_VM_LANGUAGE_ID=2 NBT_VM_REFRESH_MENU=1 NBT_VM_ACTIVATE_MENU=1 NBT_VM_HOME_INPUT=1 NBT_VM_GUI_INPUT=1 NBT_VM_RPC_BATCH=1 NBT_VM_RPC_RAM=1
+cd /opt/hmi/bin
+LD_PRELOAD=/dev/bridge/libnbt_graphics_controller.so ./HmiMain3D -c=DSI,MOSTSubSystemIntel -brand=bmw -ro=/opt/hmi/data/ro/ -rw=/var/opt/hmi/data/rw/ -sp=/var/opt/hmi/data/rw/ -vp=/opt/hmi/data/ro/ -cp=/opt/hmi/data/ro/ -iba1=/mnt/data/iba/swe1/ -iba2=/mnt/data/iba/anim-all/swe2/ -h=-1 -z=4 >/var/hmi-bridge.log 2>&1 &
+HMI_PID=$!; print -r -- "Actual HmiMain3D launched: PID=$HMI_PID"
+/bin/sleep 3
+/boot/bin/cat /var/most.log /var/hmi-bridge.log
+/boot/bin/pidin ar
