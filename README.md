@@ -1,3 +1,8 @@
+Just give project to AI if want to mess around...
+
+Vehicle specific files are not included! You need to get those on your own. Below is what I used.
+
+
 # NBT Emulator
 
 A firmware-based virtual machine for **regular BMW NBT**, with the original
@@ -65,10 +70,6 @@ Alternatively, put all four files directly inside the directory passed to
 beneath that directory. It does not search arbitrary nested directories or
 download missing firmware.
 
-Preparation verifies factory file checksums and this decoded HMI SHA-256:
-
-```
-554b67d4d6317cfb1715d544874fae8ddd2c975be503c9e2514e2dc2f3a0d693
 ```
 
 NBT EVO and other HMI versions require separate ABI work. A newer integration
@@ -245,23 +246,6 @@ Run logs are under `NBT-Emulator-Private\logs\console-<timestamp>\`:
 - `latest-frame.bmp`: the latest actual NBT renderer capture.
 - `result.json`: exit result after the VM stops.
 
-Keep logs, guest dumps and screenshots private; they are not part of the source
-release. `check` validates the inputs and hashes without starting a VM; it is
-not an end-to-end boot or menu test.
-
-## Publish the source
-
-Run `python release.py`. It audits a fixed public-file allowlist and writes a
-source ZIP beside the repository. Upload that ZIP's contents or this source
-repository to GitHub. **Do not upload the private runtime**, firmware packages,
-generated shaders, screenshots, guest dumps or logs. The `.gitignore` is an
-additional safeguard; it does not protect files dragged into a web upload.
-
-For a web upload, extract `NBT-Emulator-GitHub.zip` and upload only the contents
-of its `nbt-emulator` source folder. Do not upload its parent directory alongside
-`NBT-Emulator-Private`. The public files are the README, license, launchers,
-preparation/release scripts, requirements, authored `src` tree and tests listed
-in `public-files.json`.
 
 Each new user prepares their own private runtime. Downloading the GitHub source
 alone does not include a preinstalled NBT operating system or BMW interface assets.
